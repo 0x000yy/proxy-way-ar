@@ -1,0 +1,6 @@
+requests>=2.31.0
+cryptography>=41.0.0
+# اختياري لتفعيل Tor عبر SOCKS
+PySocks>=1.7.1
+# اختياري للتحكم في Tor عبر منفذ التحكم
+stem>=1.8.2
