@@ -842,14 +842,17 @@ class ProxyTunnel:
                 controller.authenticate()
                 return True
         except:
+            sock = None
             try:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 sock.settimeout(2)
                 sock.connect(('127.0.0.1', 9050))
-                sock.close()
                 return True
             except:
                 return False
+            finally:
+                if sock is not None:
+                    sock.close()
     
     def start(self):
         self.logger.section("🚀 Starting Proxy Tunnel v3.0")
@@ -1190,7 +1193,7 @@ class ProxyApp:
             print("PROXY TUNNEL v3.0 - القائمة الرئيسية")
             print("-"*50)
             print("  1 - تشغيل خادم البروكسي")
-            print("  2 - تشغيل عقدة (Node)")
+            print("  2 - تشغيل عقدة")
             print("  3 - عرض العقد المكتشفة")
             print("  4 - اختبار الاتصال")
             print("  5 - إحصائيات الذاكرة")
@@ -1219,11 +1222,11 @@ class ProxyApp:
                 print("[-] خيار غير صحيح")
     
     def run_proxy(self):
-        port = input("[>] المنفذ (default 8080): ").strip()
+        port = input("[>] المنفذ (الافتراضي 8080): ").strip()
         port = int(port) if port else 8080
         
-        use_encryption = input("[>] تشفير؟ (y/n, default y): ").strip().lower() != 'n'
-        use_tor = input("[>] استخدام Tor؟ (y/n, default n): ").strip().lower() == 'y'
+        use_encryption = input("[>] تشفير؟ (نعم/لا، الافتراضي نعم): ").strip().lower() not in ('لا', 'ل', 'n', 'no')
+        use_tor = input("[>] استخدام Tor؟ (نعم/لا، الافتراضي لا): ").strip().lower() in ('نعم', 'ن', 'y', 'yes')
         
         self.proxy = ProxyTunnel(port, use_encryption, use_tor)
         
@@ -1234,10 +1237,11 @@ class ProxyApp:
             self.logger.info("Proxy stopped")
     
     def run_node(self):
-        port = input("[>] المنفذ (default 9050): ").strip()
+        port = input("[>] المنفذ (الافتراضي 9050): ").strip()
         port = int(port) if port else 9050
         
-        node_type = input("[>] النوع (entry/middle/exit, default middle): ").strip()
+        node_type = input("[>] النوع (دخول/وسيط/خروج، الافتراضي وسيط): ").strip()
+        node_type = {'دخول': 'entry', 'وسيط': 'middle', 'خروج': 'exit'}.get(node_type, node_type)
         node_type = node_type if node_type in ['entry', 'middle', 'exit'] else 'middle'
         
         node = ProxyNode(port, node_type)
@@ -1272,7 +1276,7 @@ class ProxyApp:
             self.logger.warning("Proxy not running")
             return
         
-        url = input("[>] URL للاختبار (default https://httpbin.org/ip): ").strip()
+        url = input("[>] رابط الاختبار (الافتراضي https://httpbin.org/ip): ").strip()
         if not url:
             url = "https://httpbin.org/ip"
         
